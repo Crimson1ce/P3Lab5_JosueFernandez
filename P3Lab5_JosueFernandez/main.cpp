@@ -7,11 +7,13 @@
 #include <cstdlib>
 #include <vector>
 #include <string>
+#include <sstream>
 
 using std::endl;
 using std::cout;
 using std::cin;
 using std::vector;
+using std::stringstream;
 
 using namespace std;
 
@@ -34,15 +36,16 @@ void liberarMatriz(int**& matriz, int nFilas);
 void imprimirMatriz(int ** matriz, int nFilas, int nCol);
 //Multiplica dos matrices (si es posible) y las añade al vector de matrices
 bool multiplicarMatrices(int** m1, int nFilas, int nCol, int** m2, int nnFilas, int nnCol);
-//Retorna el producto punto de dos arreglos
-int productoPunto(int* arr1, int* arr2, int size);
+void operar(string operaciones);
 
 int main(int argc, char** argv) {
 
     srand(time(0));
 
+    int cantidadActual = 0;
+    
     int opcion = 0;
-
+    string operaciones = "";
     do {
 
         int nFilas = 0, nColumnas = 0;
@@ -75,13 +78,21 @@ int main(int argc, char** argv) {
 
                 break;
             case 3:
+                cantidadActual = vectorSize;
                 
-                cout << "Multiplicando 0 y 1 " << endl;
-                
-                if(multiplicarMatrices(lista.at(0), filas.at(0), columnas.at(0), lista.at(1), filas.at(1), columnas.at(1))){
-                    imprimirMatriz(lista.at(vectorSize-1),filas.at(vectorSize-1), columnas.at(vectorSize-1));
-                }
-                
+                operaciones = "";
+                cout << "Ingrese las operaciones a realizar: ";
+                cin >> operaciones;
+
+                operar(operaciones);
+
+
+                //                cout << "Multiplicando 0 y 1 " << endl;
+                //                
+                //                if(multiplicarMatrices(lista.at(0), filas.at(0), columnas.at(0), lista.at(1), filas.at(1), columnas.at(1))){
+                //                    imprimirMatriz(lista.at(vectorSize-1),filas.at(vectorSize-1), columnas.at(vectorSize-1));
+                //                }
+
                 break;
             case 4:
 
@@ -187,8 +198,8 @@ void imprimirMatriz(int ** matriz, int nFilas, int nCol) {
     }
 }
 
-bool multiplicarMatrices(int** m1, int nFilas, int nCol, 
-                         int** m2, int nnFilas, int nnCol) {
+bool multiplicarMatrices(int** m1, int nFilas, int nCol,
+        int** m2, int nnFilas, int nnCol) {
     if (nCol != nnFilas) {
         return false;
     }
@@ -198,7 +209,7 @@ bool multiplicarMatrices(int** m1, int nFilas, int nCol,
         for (int j = 0; j < nnCol; j++) {
             nueva[i][j] = 0;
             for (int k = 0; k < nCol; k++) {
-                nueva[i][j] += (m1[i][k] * m2[k][i]);
+                nueva[i][j] += (m1[i][k] * m2[k][j]);
             }
         }
     }
@@ -211,3 +222,109 @@ bool multiplicarMatrices(int** m1, int nFilas, int nCol,
 
     return true;
 }
+
+int contar(string cadena, char caracter){
+    int contador = 0;
+    
+    for(int i=0; i<cadena.length(); i++){
+        if(cadena[i] == caracter){
+            contador++;
+        }
+    }
+    
+    return contador;
+}
+
+bool sumarMatrices(int** m1, int nFilas, int nCol,
+        int** m2, int nnFilas, int nnCol) {
+    
+    if(nFilas != nnFilas || nCol != nnCol){
+        false;
+    }
+    
+    int** nueva = new int*[nFilas];
+    for (int i = 0; i < nFilas; i++) {
+        nueva[i] = new int[nCol];
+        for (int j = 0; j < nCol; j++) {
+            nueva[i][j] =  (m1[i][j] + m2[i][j]);
+        }
+    }
+
+    //Agregamos la nueva matriz a la lista
+    lista.push_back(nueva);
+    filas.push_back(nFilas);
+    columnas.push_back(nnCol);
+    vectorSize++;
+    
+    return true;
+}
+
+bool restarMatrices(int** m1, int nFilas, int nCol,
+        int** m2, int nnFilas, int nnCol) {
+    
+    if(nFilas != nnFilas || nCol != nnCol){
+        false;
+    }
+    
+    int** nueva = new int*[nFilas];
+    for (int i = 0; i < nFilas; i++) {
+        nueva[i] = new int[nCol];
+        for (int j = 0; j < nCol; j++) {
+            nueva[i][j] =  (m1[i][j] - m2[i][j]);
+        }
+    }
+
+    //Agregamos la nueva matriz a la lista
+    lista.push_back(nueva);
+    filas.push_back(nFilas);
+    columnas.push_back(nnCol);
+    vectorSize++;
+    
+    return true;
+}
+
+void operar(string operaciones) {
+    string nueva = "";
+
+    int sizeOp = 0;
+    vector <char> operadores;
+
+    int sizeTer = 0;
+    vector <string> terminos;
+
+    
+    
+    //string auxiliar;
+    int ultimo = 0;
+    for (int i = 0; i < operaciones.length(); i++) {
+        if (operaciones[i] == '+' || operaciones[i] == '-') {
+
+            operadores.push_back(operaciones[i]);
+            sizeOp++;
+
+            terminos.push_back(operaciones.substr(ultimo, i));
+            ultimo = i + 1;
+            sizeTer++;
+        }
+    }
+    terminos.push_back(operaciones.substr(ultimo));
+    sizeTer++;
+
+    
+    for (int i = 0; i < sizeTer; i++) {
+        
+        int cantidad = contar(terminos.at(i),'*');
+        
+        string parsed;
+        stringstream ss;
+        
+        if(cantidad > 0){
+            for (int j = 0; j < size; j++) {
+            }
+        }
+    }
+
+
+}
+
+
