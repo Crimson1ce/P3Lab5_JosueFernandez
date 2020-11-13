@@ -16,30 +16,32 @@ using std::vector;
 using namespace std;
 
 int vectorSize = 0;
+vector <int**> lista;
+vector <int> filas;
+vector <int> columnas;
 
 //Prototipos
 
 //Muestra las opciones y retorna la elegida por el usuario
 int menu();
 //Genera una matriz con numeros aleatorios entre -50 y 50
-void generarMatriz(int nFilas, int nColumnas, vector <int**>& matrices, vector <int>& filas, vector <int>& columnas);
+void generarMatriz(int nFilas, int nColumnas);
 //Pide al usuario que ingrese los numeros de la matriz
-void pedirMatriz(int nFilas, int nColumnas, vector<int**>& matrices, vector <int>& filas, vector <int>& columnas);
+void pedirMatriz(int nFilas, int nColumnas);
 //Libera la matriz
 void liberarMatriz(int**& matriz, int nFilas);
 //Imprime la matriz
 void imprimirMatriz(int ** matriz, int nFilas, int nCol);
+//Multiplica dos matrices (si es posible) y las añade al vector de matrices
+bool multiplicarMatrices(int** m1, int nFilas, int nCol, int** m2, int nnFilas, int nnCol);
+//Retorna el producto punto de dos arreglos
+int productoPunto(int* arr1, int* arr2, int size);
 
 int main(int argc, char** argv) {
 
     srand(time(0));
 
     int opcion = 0;
-    vector <int**> lista;
-    vector <int> filas;
-    vector <int> columnas;
-
-    filas.push_back(14);
 
     do {
 
@@ -63,9 +65,9 @@ int main(int argc, char** argv) {
                 }
 
                 if (opcion == 1) {
-                    pedirMatriz(nFilas, nColumnas, lista, filas, columnas);
+                    pedirMatriz(nFilas, nColumnas);
                 } else {
-                    generarMatriz(nFilas, nColumnas, lista, filas, columnas);
+                    generarMatriz(nFilas, nColumnas);
                 }
 
                 imprimirMatriz(lista.at(vectorSize - 1), nFilas, nColumnas);
@@ -73,7 +75,13 @@ int main(int argc, char** argv) {
 
                 break;
             case 3:
-
+                
+                cout << "Multiplicando 0 y 1 " << endl;
+                
+                if(multiplicarMatrices(lista.at(0), filas.at(0), columnas.at(0), lista.at(1), filas.at(1), columnas.at(1))){
+                    imprimirMatriz(lista.at(vectorSize-1),filas.at(vectorSize-1), columnas.at(vectorSize-1));
+                }
+                
                 break;
             case 4:
 
@@ -85,24 +93,21 @@ int main(int argc, char** argv) {
 
     } while (opcion != 4);
 
-    cout << "\nSalio con " << vectorSize;
+    //reverse_iterator<> ri = lista.rbegin();
 
-
-    while(lista.rbegin()) { // int i = vectorSize - 1; i > 0; i--
-        cout << "\n\tVuelta #" << vectorSize--;
-        int** matriz = lista.at(vectorSize);
-        cout << "\nRecibio la referencia";
-        liberarMatriz(matriz, filas.at(vectorSize));
-        cout << "\nLibero la matriz";
-        lista.pop_back();
-        cout << "\nHizo pop_back la lista";
-        filas.pop_back();
-        cout << "\nHizo pop_back las filas";
-        columnas.pop_back();
-        cout << "\nHizo pop_back las columnas";
+    for (int i = 0; i < vectorSize; i++) {
+        int** matriz = lista.at(i);
+        liberarMatriz(matriz, filas.at(i));
     }
 
-    cout << "\nTermino";
+    lista.erase(lista.begin(), lista.end());
+    lista.shrink_to_fit();
+
+    filas.erase(filas.begin(), filas.end());
+    filas.shrink_to_fit();
+
+    columnas.erase(columnas.begin(), columnas.end());
+    columnas.shrink_to_fit();
 
     return 0;
 }
@@ -125,7 +130,7 @@ int menu() {
     return opcion;
 }
 
-void generarMatriz(int nFilas, int nColumnas, vector <int**>& matrices, vector <int>& filas, vector <int>& columnas) {
+void generarMatriz(int nFilas, int nColumnas) {
     if (nFilas > 0 && nColumnas > 0) {
         int** mat = new int*[nFilas];
         for (int i = 0; i < nFilas; i++) {
@@ -134,14 +139,14 @@ void generarMatriz(int nFilas, int nColumnas, vector <int**>& matrices, vector <
                 mat[i][j] = (-50 + rand() % 101);
             }
         }
-        matrices.push_back(mat);
+        lista.push_back(mat);
         filas.push_back(nFilas);
         columnas.push_back(nColumnas);
         vectorSize++;
     }
 }
 
-void pedirMatriz(int nFilas, int nColumnas, vector<int**>& matrices, vector <int>& filas, vector <int>& columnas) {
+void pedirMatriz(int nFilas, int nColumnas) {
     if (nFilas > 0 && nColumnas > 0) {
         int** mat = new int*[nFilas];
         for (int i = 0; i < nFilas; i++) {
@@ -151,7 +156,7 @@ void pedirMatriz(int nFilas, int nColumnas, vector<int**>& matrices, vector <int
                 cin >> mat[i][j];
             }
         }
-        matrices.push_back(mat);
+        lista.push_back(mat);
         filas.push_back(nFilas);
         columnas.push_back(nColumnas);
         vectorSize++;
@@ -180,4 +185,29 @@ void imprimirMatriz(int ** matriz, int nFilas, int nCol) {
             cout << endl;
         }
     }
+}
+
+bool multiplicarMatrices(int** m1, int nFilas, int nCol, 
+                         int** m2, int nnFilas, int nnCol) {
+    if (nCol != nnFilas) {
+        return false;
+    }
+    int** nueva = new int*[nFilas];
+    for (int i = 0; i < nFilas; i++) {
+        nueva[i] = new int[nnCol];
+        for (int j = 0; j < nnCol; j++) {
+            nueva[i][j] = 0;
+            for (int k = 0; k < nCol; k++) {
+                nueva[i][j] += (m1[i][k] * m2[k][i]);
+            }
+        }
+    }
+
+    //Agregamos la nueva matriz a la lista
+    lista.push_back(nueva);
+    filas.push_back(nFilas);
+    columnas.push_back(nnCol);
+    vectorSize++;
+
+    return true;
 }
